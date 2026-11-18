@@ -185,7 +185,7 @@ def err(status, msg):
 
 @app.post("/api/run")
 async def post_run(request: Request):
-    if request.headers.get("origin") != ALLOWED_ORIGIN:
+    if request.headers.get("origin") not in (ALLOWED_ORIGIN, f"{request.url.scheme}://{request.url.netloc}"):
         return err(403, "bad origin")
     if int(request.headers.get("content-length") or 0) > MAX_BODY:
         return err(413, "too large")
@@ -212,6 +212,7 @@ async def post_run(request: Request):
                 (r.country, normalize_campus(r.campus), r.degree, r.chapters, r.days, r.pages, r.revisions,
                  r.title_changes, r.approvals, r.reply_days, r.coffee, r.sleep, persona(r)),
             )
+        _stats_cache[0] = 0.0
         values = {"revisions": r.revisions, "pages": r.pages, "coffee": r.coffee, "sleep": r.sleep,
                   "pace": r.days / max(r.chapters, 0.5)}
         n, pct = percentiles(db, values)

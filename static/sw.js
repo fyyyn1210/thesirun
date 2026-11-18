@@ -1,4 +1,4 @@
-const CACHE = "thesirun-v1";
+const CACHE = "thesirun-v5";
 const SHELL = ["/", "/board/", "/how-i-built-this/", "/app.css", "/app.js", "/fonts/Figtree-Variable.woff2", "/fonts/BricolageGrotesque-Variable.woff2", "/icons/icon-192.png", "/icons/favicon-32.png", "/manifest.webmanifest"];
 
 self.addEventListener("install", (e) => {

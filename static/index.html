@@ -90,6 +90,15 @@
         </ol>
       </section>
 
+      <section id="history" class="mt-10 hidden" aria-labelledby="history-title">
+        <div class="flex items-end justify-between gap-3">
+          <h2 id="history-title" class="h2" data-i18n="history_title"></h2>
+          <button id="history-clear" type="button" class="inline-flex min-h-11 shrink-0 items-center text-sm font-extrabold underline underline-offset-4" data-i18n="history_clear"></button>
+        </div>
+        <p class="mt-1 text-sm text-slate" data-i18n="history_sub"></p>
+        <ol id="history-list" class="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3"></ol>
+      </section>
+
       <section id="run" class="scroll-mt-4 pt-12">
         <p id="pacer-banner" class="mb-6 hidden rounded-3xl bg-pink p-5 text-xl font-extrabold"></p>
         <div data-reveal><p class="kicker text-slate" data-i18n="form_kicker"></p>
@@ -197,6 +206,9 @@
             <div class="mt-4 grid gap-3">
               <button id="share-card" type="button" class="btn btn-primary"><span data-icon="share" class="size-5 text-butter"></span><span data-i18n="share"></span></button>
               <button id="replay" type="button" class="btn btn-light"><span data-icon="replay" class="size-5"></span><span data-i18n="replay"></span></button>
+              <button id="share-video" type="button" class="btn btn-light"><span data-icon="play" class="size-5"></span><span data-i18n="video"></span></button>
+              <button id="share-story" type="button" class="btn btn-light"><span data-icon="link" class="size-5"></span><span data-i18n="story_link"></span></button>
+              <p id="story-msg" class="hidden text-sm font-bold break-all" role="status"></p>
             </div>
           </div>
 

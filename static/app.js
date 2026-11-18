@@ -10,6 +10,7 @@ const TEAM = { ID: C.tomato, IN: C.saffron, CN: C.pink, US: C.lilac, JP: C.butte
 const TEAM_BAR = { ...TEAM, US: "#8F78F0", JP: "#E8C400", OT: "#9DB6E0" };
 const TEAM_CLS = { ID: "bg-tomato", IN: "bg-saffron", CN: "bg-pink", US: "bg-lilac", JP: "bg-butter", OT: "bg-cloud" };
 const STATUS = [0, 0.5, 0, 1, 2, 3, 4, 5];
+const DEGREES = ["S1", "DIP", "S2", "ALUM"];
 const SLEEP_N = 5;
 const PHRASE_N = 4;
 const MIN_GROUP = 30;
@@ -55,6 +56,9 @@ const I18N = {
     phrase_custom: "Atau tulis sendiri", f_share: "Ikut statistik global (anonim)",
     privacy: "Yang dikirim hanya angka, negara, jenjang, dan kampus. Nama, lagu, kalimat, dan IP tidak disimpan.",
     go: "Lihat lari skripsiku", sending: "Menghitung…", pick_month: "Pilih bulan", this_month: "Bulan ini", prev_year: "Tahun sebelumnya", next_year: "Tahun berikutnya", err_required: "Pilih tim, jenjang, posisi, dan bulan mulai dulu ya.",
+    video: "Download video story", video_busy: "Membuat video… {p}%", video_share: "Bagikan video", video_no: "Browser ini belum bisa membuat video. Coba Chrome atau Safari terbaru.",
+    video_end: "Bikin lari skripsimu di", story_link: "Bagikan link story", story_text: "Lihat lari skripsiku di ThesiRun!", make_mine: "Bikin punyaku",
+    history_title: "Riwayat lari", history_sub: "Tersimpan di browser ini saja.", history_clear: "Hapus riwayat", history_meta: "{date} · {pages} halaman",
     card_title: "Kartu lari-mu", share: "Bagikan / Download", replay: "Putar ulang story",
     duo_title: "Kartu duo pacer", pacer_kicker: "Cari pacer", pacer_title: "Tantang teman", pacer_body: "Kirim link ke teman. Mereka isi, kalian dapat skor duel dan kecocokan.",
     pacer_btn: "Bagikan link pacer", pacer_text: "Duel skripsi denganku di ThesiRun!", copied: "Link disalin",
@@ -117,6 +121,9 @@ const I18N = {
     phrase_custom: "Or write your own", f_share: "Join global stats (anonymous)",
     privacy: "Only numbers, country, degree, and campus are sent. Name, song, phrase, and IP are never stored.",
     go: "Show my thesis run", sending: "Crunching…", pick_month: "Pick a month", this_month: "This month", prev_year: "Previous year", next_year: "Next year", err_required: "Pick your team, degree, stage, and start month first.",
+    video: "Download story video", video_busy: "Making video… {p}%", video_share: "Share video", video_no: "This browser can't make videos yet. Try the latest Chrome or Safari.",
+    video_end: "Make your thesis run at", story_link: "Share story link", story_text: "Watch my thesis run on ThesiRun!", make_mine: "Make mine",
+    history_title: "Run history", history_sub: "Saved in this browser only.", history_clear: "Clear history", history_meta: "{date} · {pages} pages",
     card_title: "Your run card", share: "Share / Download", replay: "Replay story",
     duo_title: "Pacer duo card", pacer_kicker: "Find a pacer", pacer_title: "Challenge a friend", pacer_body: "Send a link to a friend. They fill it in, you both get a duel score and a match score.",
     pacer_btn: "Share pacer link", pacer_text: "Duel my thesis run on ThesiRun!", copied: "Link copied",
@@ -698,6 +705,29 @@ function readPacer() {
   }
 }
 
+const storyUrl = (r) => `${location.origin}/#s=${enc({ n: r.name, c: r.country, d: r.degree, st: r.status, dy: r.days, g: r.pages, r: r.revisions, t: r.title_changes, a: r.approvals, w: r.reply_days, k: r.coffee, s: r.sleep })}`;
+
+function readStory() {
+  const m = location.hash.match(/^#s=([\w-]{1,600})$/);
+  if (!m) return null;
+  try {
+    const o = dec(m[1]);
+    const n = (v, max) => Math.min(max, Math.max(0, Math.round(Number(v) || 0)));
+    if (!COUNTRIES.includes(o.c) || !DEGREES.includes(o.d)) return null;
+    const f = { name: String(o.n || "").slice(0, 20), country: o.c, campus: "", degree: o.d, status: n(o.st, STATUS.length - 1), days: Math.max(1, n(o.dy, 3650)), pages: n(o.g, 300), revisions: n(o.r, 50), title_changes: n(o.t, 10), approvals: n(o.a, 30), reply_days: n(o.w, 30), coffee: n(o.k, 50), sleep: n(o.s, SLEEP_N - 1), song: "", phrase: "", share: false, website: "" };
+    return { ...compute(f), shared: true };
+  } catch {
+    return null;
+  }
+}
+
+function flash(el, text) {
+  el.textContent = text;
+  el.classList.remove("hidden", "animate-pop");
+  void el.offsetWidth;
+  el.classList.add("animate-pop");
+}
+
 const pacerUrl = (r) => `${location.origin}/#p=${enc({ n: r.name, c: r.country, p: r.pace, r: r.revisions, k: r.coffee, s: r.sleep, b: r.chapters, g: r.pages, a: r.approvals, q: r.persona })}`;
 
 function matchScore(a, b) {
@@ -835,10 +865,36 @@ async function onSubmit(e) {
       }
     } catch {}
   }
+  saveHistory(run);
   await loadStats();
   busy(btn, false);
   btn.lastChild.textContent = t("go");
   openStory();
+}
+
+function saveHistory(r) {
+  store.set("history", JSON.stringify([{ ...r, at: Date.now() }, ...store.json("history", [])].slice(0, 10)));
+  renderHistory();
+}
+
+function renderHistory() {
+  const list = store.json("history", []);
+  $("history").classList.toggle("hidden", !list.length);
+  const day = new Intl.DateTimeFormat(lang === "id" ? "id-ID" : "en-US", { day: "numeric", month: "short", year: "numeric" });
+  $("history-list").replaceChildren(...list.map((r) => {
+    const b = h("button", "lift flex w-full items-center gap-3 rounded-3xl bg-white p-4 text-left shadow-drop");
+    b.type = "button";
+    const txt = h("span", "grid min-w-0");
+    txt.append(h("b", "truncate", r.name || t("p_" + r.persona)), h("span", "text-sm text-slate", t("history_meta", { date: day.format(r.at), pages: fmt(r.pages) })));
+    b.append(h("span", "team h-8 shrink-0 px-3 " + (TEAM_CLS[r.country] || TEAM_CLS.OT), r.country), txt);
+    b.addEventListener("click", () => {
+      run = r;
+      openStory();
+    });
+    const li = h("li");
+    li.append(b);
+    return li;
+  }));
 }
 
 function sampleRun() {
@@ -877,7 +933,7 @@ function inBurst(color, child, size = "size-56") {
 }
 
 function seeCard() {
-  const b = h("button", "btn relative mt-8 w-full bg-butter text-night", t("see_card"));
+  const b = h("button", "btn relative mt-8 w-full bg-butter text-night", t(run.shared ? "make_mine" : "see_card"));
   b.type = "button";
   b.addEventListener("click", closeStory);
   return b;
@@ -889,7 +945,7 @@ function routeDiamonds(r) {
   for (let i = 1; i <= 6; i++) {
     if (i > 1) row.append(h("span", "h-0 flex-1 border-t-4 border-dotted border-white"));
     const done = r.finished || i <= r.chapters, cur = !r.finished && i === next;
-    row.append(h("span", "size-6 shrink-0 rotate-45 rounded-sm border-[3px] " + (done ? "border-night bg-night" : cur ? "border-butter bg-butter" : "border-white")));
+    row.append(h("span", "size-6 shrink-0 rotate-45 rounded-sm border-[3px] " + (done ? "border-current bg-current" : cur ? "border-butter bg-butter" : "border-white")));
     labels.append(h("span", "w-8 text-center", i < 6 ? String(i) : "FIN"));
   }
   box.append(row, labels);
@@ -1060,6 +1116,7 @@ const next = () => (idx === slides.length - 1 ? closeStory() : show(idx + 1));
 function closeStory() {
   $("story").hidden = true;
   document.body.classList.remove("overflow-hidden");
+  if (run.shared) return $("run").scrollIntoView();
   showResult();
 }
 
@@ -1360,15 +1417,387 @@ async function drawDuo(a, b) {
   return [sa, sb];
 }
 
-async function shareCanvas(cv, name, btn) {
-  if (!cv.blob && btn) {
-    busy(btn, true);
-    for (let i = 0; !cv.blob && i < 50; i++) await new Promise((r) => setTimeout(r, 100));
-    busy(btn, false);
+const VIDEO_TYPES = ["video/mp4;codecs=avc1", "video/mp4", "video/webm;codecs=vp9", "video/webm"];
+const SLIDE_MS = 1800;
+let video = null;
+
+function wrapText(x, text, X, Y, maxW, lh) {
+  let line = "";
+  for (const w of String(text).split(" ")) {
+    const test = line ? line + " " + w : w;
+    if (line && x.measureText(test).width > maxW) {
+      x.fillText(line, X, Y);
+      Y += lh;
+      line = w;
+    } else line = test;
   }
-  const blob = cv.blob;
-  if (!blob) return;
-  const file = new File([blob], name, { type: "image/png" });
+  if (line) x.fillText(line, X, Y);
+  return Y + lh;
+}
+
+function videoSlides(r) {
+  const [pose, pi] = PERSONA_ART[r.persona], tw = W - 2 * M;
+  const num = (v, p) => fmt(Math.round(v * Math.min(1, p * 1.8)));
+  const big = (x, txt, Y, color, size = 360) => {
+    x.fillStyle = color;
+    x.fillText(fit(x, txt, tw, 800, size, 120, true), M, Y);
+  };
+  const text = (x, txt, Y, color, size, w = 800, display = false) => {
+    font(x, w, size, display);
+    x.fillStyle = color;
+    return wrapText(x, txt, M, Y, tw, size * 1.18);
+  };
+  const fig = (x, ps, i, cx, cy, s) => {
+    const [bw, bh] = POSES[ps].box;
+    drawFigure(x, ps, pal(i), cx - (bw * s) / 2, cy - (bh * s) / 2, s);
+  };
+  const diamonds = (x, Y, done, cur, fg) => {
+    const gap = (tw - 60) / 5;
+    for (let i = 0; i < 6; i++) {
+      const cx = M + 30 + gap * i;
+      if (i) {
+        x.fillStyle = C.white;
+        for (let d = cx - gap + 50; d < cx - 40; d += 22) x.fillRect(d, Y - 4, 8, 8);
+      }
+      x.save();
+      x.translate(cx, Y);
+      x.rotate(Math.PI / 4);
+      x.beginPath();
+      x.roundRect(-22, -22, 44, 44, 6);
+      x.lineWidth = 7;
+      x.strokeStyle = x.fillStyle = i < done ? fg : i === cur ? C.butter : C.white;
+      i < done || i === cur ? x.fill() : x.stroke();
+      x.restore();
+      x.fillStyle = fg;
+      font(x, 800, 32);
+      x.textAlign = "center";
+      x.fillText(i < 5 ? String(i + 1) : "FIN", cx, Y + 80);
+      x.textAlign = "left";
+    }
+  };
+  const spin = (x, cx, cy, rad, color, p) => {
+    x.save();
+    x.translate(cx, cy);
+    x.rotate(p * 0.6);
+    drawBurst(x, 0, 0, rad, color);
+    x.restore();
+  };
+  const S = [
+    [C.sky, C.night, (x, p, up) => {
+      drawDecor(x, "cloud", 60, 300, 4, C.cloud, 0.7);
+      drawDecor(x, "cloud", 760, 220, 3.2, C.cloud, 0.6);
+      drawDecor(x, "star", 200, 640, 3.4, C.butter);
+      x.translate(0, up(0));
+      fig(x, pose, pi, W / 2, 720, 4.2);
+      x.translate(0, up(1));
+      text(x, t("s1", { name: r.name || "Runner" }), 1260, C.white, 110, 800, true);
+    }],
+    [C.sky, C.night, (x, p, up) => {
+      x.translate(0, up(0));
+      text(x, t("s2k"), 620, C.night, 68);
+      x.translate(0, up(1));
+      big(x, num(r.days, p), 1000, C.white);
+      x.translate(0, up(2));
+      pill(x, t("s2u"), M, 1060, C.butter, C.night, 90);
+      x.translate(0, up(3));
+      text(x, t("s2s"), 1360, C.night, 54, 600);
+    }],
+    [C.butter, C.night, (x, p, up) => {
+      x.translate(0, up(0));
+      text(x, t("s3k"), 620, C.night, 68);
+      x.translate(0, up(1));
+      big(x, num(r.pages, p), 1000, C.night);
+      x.translate(0, up(2));
+      text(x, t("s3u"), 1150, C.night, 130, 800, true);
+      x.translate(0, up(3));
+      x.fillStyle = "rgba(14,26,68,.15)";
+      x.beginPath();
+      x.roundRect(M, 1240, tw, 44, 22);
+      x.fill();
+      x.fillStyle = C.night;
+      x.beginPath();
+      x.roundRect(M, 1240, Math.max(44, tw * Math.min(1, r.pages / 300) * Math.min(1, p * 1.8)), 44, 22);
+      x.fill();
+    }],
+    [C.pink, C.night, (x, p, up) => {
+      x.translate(0, up(0));
+      text(x, t("s4k"), 620, C.night, 68);
+      x.translate(0, up(1));
+      big(x, `${num(r.elev, p)} m`, 1000, C.night, 300);
+      x.translate(0, up(2));
+      text(x, t("s4s", { rev: fmt(r.revisions), cmp: elevCmp(r.elev, r.country) }), 1160, C.night, 58, 600);
+    }],
+    [C.night, C.paper, (x, p, up) => {
+      x.translate(0, up(0));
+      text(x, t("s5k"), 620, C.paper, 68);
+      x.translate(0, up(1));
+      big(x, num(r.reply_days, p), 1000, C.butter);
+      x.translate(0, up(2));
+      text(x, t("days_up"), 1150, C.butter, 120, 800, true);
+      x.translate(0, up(3));
+      text(x, t("s5s", { wait: fmt(r.wait) }), 1300, C.paper, 54, 600);
+    }],
+    [C.tomato, C.night, (x, p, up) => {
+      x.translate(0, up(0));
+      text(x, t("s6k"), 620, C.night, 68);
+      x.translate(0, up(1));
+      big(x, num(r.coffee, p), 1000, C.night);
+      x.translate(0, up(2));
+      text(x, t("s6u"), 1130, C.night, 100, 800, true);
+      x.translate(0, up(3));
+      text(x, t("s6s", { time: t("sl_" + r.sleep) }), 1300, C.night, 54, 600);
+    }],
+    [TEAM[r.country], C.night, (x, p, up) => {
+      const lg = teamLeague(), max = Math.max(1, ...lg.map((q) => q.v));
+      x.translate(0, up(0));
+      text(x, t("s8k"), 420, C.night, 68);
+      x.translate(0, up(1));
+      big(x, num(r.pages, p), 720, C.night, 300);
+      x.translate(0, up(2));
+      text(x, `${t("s8u")} ${t("s8s", { team: countryName(r.country) })}`, 850, C.night, 76, 800, true);
+      x.translate(0, up(3));
+      lg.forEach((q, i) => {
+        const Y = 1040 + i * 112, mine = q.k === r.country, bw = Math.max(360, (tw + M) * (0.4 + (q.v / max) * 0.52) * Math.min(1, p * 1.8));
+        x.fillStyle = mine ? C.night : TEAM[q.k];
+        x.beginPath();
+        x.roundRect(0, Y, bw, 92, [0, 46, 46, 0]);
+        x.fill();
+        x.strokeStyle = "rgba(14,26,68,.15)";
+        x.lineWidth = 4;
+        x.stroke();
+        x.fillStyle = mine ? C.butter : C.night;
+        font(x, 800, 40);
+        x.fillText(`${i + 1} · ${CODE[q.k]}`, M, Y + 60);
+        x.textAlign = "right";
+        x.fillText(q.n ? fmt(q.v) : "–", bw - 40, Y + 60);
+        x.textAlign = "left";
+      });
+      text(x, lg.some((q) => q.n) ? t("s8_league") : t("s8_wait"), 1640, C.night, 40);
+    }],
+    [C.night, C.butter, (x, p, up) => {
+      x.translate(0, up(0));
+      text(x, t("s9k"), 360, C.cloud, 68);
+      spin(x, W / 2, 760, 330, C.sky, p);
+      x.translate(0, up(1));
+      fig(x, pose, pi, W / 2, 760, 3.4);
+      x.translate(0, up(2));
+      const words = t("p_" + r.persona).toUpperCase().split(" "), many = words.length > 2;
+      words.forEach((w, i) => {
+        x.fillStyle = i % 2 ? C.pink : C.butter;
+        x.fillText(fit(x, w, tw, 800, many ? 190 : 230, 100, true), M, 1330 + i * (many ? 180 : 210));
+      });
+    }],
+    r.finished
+      ? [C.night, C.butter, (x, p, up) => {
+          spin(x, W / 2, 560, 290, C.butter, p);
+          fig(x, "jump", 2, W / 2, 560, 3);
+          x.translate(0, up(0));
+          big(x, "FINISHER", 1080, C.butter, 230);
+          x.translate(0, up(1));
+          text(x, t("s10f", { days: fmt(r.days), pages: fmt(r.pages), rev: fmt(r.revisions) }), 1200, C.paper, 54, 600);
+          x.translate(0, up(2));
+          diamonds(x, 1500, 6, -1, C.butter);
+        }]
+      : [C.sky, C.night, (x, p, up) => {
+          const nx = Math.min(5, Math.floor(r.chapters) + 1);
+          x.translate(0, up(0));
+          diamonds(x, 560, Math.floor(r.chapters), nx - 1, C.night);
+          x.translate(0, up(1));
+          text(x, t("s10", { next: nx }), 860, C.white, 150, 800, true);
+          x.translate(0, up(2));
+          text(x, t("s10s"), 1420, C.night, 56, 600);
+        }],
+    [C.sky, C.night, (x, p, up) => {
+      drawDecor(x, "cloud", 80, 260, 3.4, C.cloud, 0.7);
+      drawDecor(x, "star", 860, 420, 3, C.butter);
+      x.translate(0, up(0));
+      text(x, t("video_end"), 640, C.night, 64);
+      x.translate(0, up(1));
+      big(x, "ThesiRun", 830, C.white, 200);
+      x.translate(0, up(2));
+      pill(x, URL_APP, M, 900, C.night, C.butter, 52);
+      x.translate(0, up(3));
+      drawQR(x, M, 1120, 400, C.night);
+      font(x, 800, 52);
+      x.fillStyle = C.night;
+      x.fillText(TAG, M, 1640);
+    }],
+  ];
+  return S.map(([bg, fg, draw]) => ({ bg, fg, draw }));
+}
+
+function drawVideoFrame(x, list, ms) {
+  const i = Math.min(list.length - 1, Math.floor(ms / SLIDE_MS)), p = (ms - i * SLIDE_MS) / SLIDE_MS, s = list[i];
+  let prev = 0;
+  const up = (k) => {
+    const q = Math.min(1, Math.max(0, (p * SLIDE_MS - k * 90) / 420)), off = (1 - q) ** 3 * 70, d = off - prev;
+    x.globalAlpha = 1 - (1 - q) ** 3;
+    prev = off;
+    return d;
+  };
+  x.setTransform(1, 0, 0, 1, 0, 0);
+  x.globalAlpha = 1;
+  x.textAlign = "left";
+  x.fillStyle = s.bg;
+  x.fillRect(0, 0, W, H);
+  x.save();
+  s.draw(x, p, up);
+  x.restore();
+  x.globalAlpha = 1;
+  const bw = (W - 72 - (list.length - 1) * 10) / list.length;
+  list.forEach((_, j) => {
+    const bx = 36 + j * (bw + 10);
+    x.fillStyle = s.fg;
+    x.globalAlpha = 0.3;
+    x.fillRect(bx, 36, bw, 8);
+    x.globalAlpha = 1;
+    x.fillRect(bx, 36, bw * (j < i ? 1 : j === i ? p : 0), 8);
+  });
+  x.fillStyle = s.fg;
+  font(x, 800, 40, true);
+  x.fillText(BRAND, M, H - 80);
+}
+
+const FPS = 30;
+const AVC_CODECS = ["avc1.640028", "avc1.4D0028", "avc1.42E028"];
+
+function mp4Parts(samples, avcC) {
+  const u = (v, b = 4) => Array.from({ length: b }, (_, i) => Math.floor(v / 2 ** (8 * (b - 1 - i))) & 255);
+  const str = (s) => [...s].map((c) => c.charCodeAt(0));
+  const cat = (parts) => {
+    const arrs = parts.map((p) => (p instanceof Uint8Array ? p : Uint8Array.from(p)));
+    const out = new Uint8Array(arrs.reduce((s, a) => s + a.length, 0));
+    let o = 0;
+    for (const a of arrs) {
+      out.set(a, o);
+      o += a.length;
+    }
+    return out;
+  };
+  const box = (type, ...parts) => {
+    const body = cat(parts);
+    return cat([u(body.length + 8), str(type), body]);
+  };
+  const full = (type, flags, ...parts) => box(type, u(flags), ...parts);
+  const n = samples.length, tick = 90000 / FPS, dur = n * tick, ms = Math.round((n * 1000) / FPS);
+  const matrix = [0x10000, 0, 0, 0, 0x10000, 0, 0, 0, 0x40000000].map((v) => u(v));
+  const ftyp = box("ftyp", str("isom"), u(512), str("isomiso2avc1mp41"));
+  const size = samples.reduce((s, x) => s + x.data.length, 0);
+  const keys = samples.flatMap((s, i) => (s.key ? [u(i + 1)] : []));
+  const avc1 = box("avc1", u(0, 6), u(1, 2), u(0, 16), u(W, 2), u(H, 2), u(0x480000), u(0x480000), u(0), u(1, 2), u(0, 32), u(0x18, 2), u(0xffff, 2), box("avcC", avcC));
+  const stbl = box("stbl",
+    full("stsd", 0, u(1), avc1),
+    full("stts", 0, u(1), u(n), u(tick)),
+    full("stss", 0, u(keys.length), ...keys),
+    full("stsc", 0, u(1), u(1), u(n), u(1)),
+    full("stsz", 0, u(0), u(n), ...samples.map((s) => u(s.data.length))),
+    full("stco", 0, u(1), u(ftyp.length + 8)),
+  );
+  const minf = box("minf", full("vmhd", 1, u(0, 8)), box("dinf", full("dref", 0, u(1), full("url ", 1))), stbl);
+  const mdia = box("mdia", full("mdhd", 0, u(0), u(0), u(90000), u(dur), u(0x55c4, 2), u(0, 2)), full("hdlr", 0, u(0), str("vide"), u(0, 12), str("VideoHandler"), [0]), minf);
+  const trak = box("trak", full("tkhd", 3, u(0), u(0), u(1), u(0), u(ms), u(0, 8), u(0, 2), u(0, 2), u(0, 2), u(0, 2), ...matrix, u(W * 65536), u(H * 65536)), mdia);
+  const moov = box("moov", full("mvhd", 0, u(0), u(0), u(1000), u(ms), u(0x10000), u(0x100, 2), u(0, 10), ...matrix, u(0, 24), u(2)), trak);
+  return [ftyp, cat([u(size + 8), str("mdat")]), ...samples.map((s) => s.data), moov];
+}
+
+async function encodeMp4(list, onProgress) {
+  if (!window.VideoEncoder || !window.VideoFrame) return null;
+  let cfg = null;
+  for (const codec of AVC_CODECS) {
+    const c = { codec, width: W, height: H, bitrate: 6e6, framerate: FPS, latencyMode: "realtime", avc: { format: "avc" } };
+    if ((await VideoEncoder.isConfigSupported(c).catch(() => ({}))).supported) {
+      cfg = c;
+      break;
+    }
+  }
+  if (!cfg) return null;
+  const samples = [];
+  let avcC = null, fail = null;
+  const enc = new VideoEncoder({
+    output: (chunk, meta) => {
+      const d = meta?.decoderConfig?.description;
+      if (d && !avcC) avcC = new Uint8Array(ArrayBuffer.isView(d) ? d.buffer.slice(d.byteOffset, d.byteOffset + d.byteLength) : d.slice(0));
+      const data = new Uint8Array(chunk.byteLength);
+      chunk.copyTo(data);
+      samples.push({ data, key: chunk.type === "key" });
+    },
+    error: (e) => (fail = e),
+  });
+  enc.configure(cfg);
+  const cv = h("canvas");
+  cv.width = W;
+  cv.height = H;
+  const x = cv.getContext("2d"), n = Math.round((list.length * SLIDE_MS * FPS) / 1000);
+  for (let i = 0; i < n && !fail; i++) {
+    drawVideoFrame(x, list, (i * 1000) / FPS);
+    const f = new VideoFrame(cv, { timestamp: Math.round((i * 1e6) / FPS), duration: Math.round(1e6 / FPS) });
+    enc.encode(f, { keyFrame: i % (FPS * 2) === 0 });
+    f.close();
+    while (enc.encodeQueueSize > 8) await new Promise((r) => setTimeout(r, 5));
+    if (i % 10 === 0) {
+      onProgress(Math.round((i / n) * 99));
+      await new Promise((r) => setTimeout(r));
+    }
+  }
+  if (!fail) await enc.flush().catch((e) => (fail = e));
+  enc.close();
+  if (fail || !avcC || samples.length !== n) return null;
+  return new File(mp4Parts(samples, avcC), "thesirun-story.mp4", { type: "video/mp4" });
+}
+
+async function makeVideo(r, onProgress) {
+  await fontsReady();
+  tc = r.country;
+  const list = videoSlides(r);
+  return (await encodeMp4(list, onProgress).catch(() => null)) || recordVideo(list, onProgress);
+}
+
+async function recordVideo(list, onProgress) {
+  const type = VIDEO_TYPES.find((m) => window.MediaRecorder?.isTypeSupported?.(m));
+  if (!type || !HTMLCanvasElement.prototype.captureStream) return null;
+  const cv = h("canvas");
+  cv.width = W;
+  cv.height = H;
+  const x = cv.getContext("2d"), total = list.length * SLIDE_MS;
+  drawVideoFrame(x, list, 0);
+  const stream = cv.captureStream(30), rec = new MediaRecorder(stream, { mimeType: type, videoBitsPerSecond: 6e6 }), parts = [];
+  rec.ondataavailable = (e) => e.data.size && parts.push(e.data);
+  const stopped = new Promise((res) => (rec.onstop = res));
+  rec.start(500);
+  const t0 = performance.now();
+  await new Promise((res) => {
+    const tick = () => {
+      const ms = performance.now() - t0;
+      drawVideoFrame(x, list, Math.min(ms, total - 1));
+      onProgress(Math.min(99, Math.round((ms / total) * 100)));
+      ms < total ? setTimeout(tick, 33) : res();
+    };
+    tick();
+  });
+  rec.stop();
+  await stopped;
+  stream.getTracks().forEach((k) => k.stop());
+  return new File(parts, `thesirun-story.${type.startsWith("video/mp4") ? "mp4" : "webm"}`, { type: type.split(";")[0] });
+}
+
+async function shareVideo(btn) {
+  const label = btn.lastChild;
+  if (!video) {
+    busy(btn, true);
+    video = await makeVideo(run, (p) => (label.textContent = t("video_busy", { p })));
+    busy(btn, false);
+    if (!video) {
+      label.textContent = t("video");
+      return flash($("story-msg"), t("video_no"));
+    }
+    label.dataset.i18n = "video_share";
+    label.textContent = t("video_share");
+    return;
+  }
+  await shareFile(video);
+}
+
+async function shareFile(file) {
   if (navigator.canShare?.({ files: [file] })) {
     try {
       return await navigator.share({ files: [file], text: `${BRAND} https://${URL_APP} ${TAG}` });
@@ -1377,10 +1806,21 @@ async function shareCanvas(cv, name, btn) {
     }
   }
   const a = h("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = name;
+  a.href = URL.createObjectURL(file);
+  a.download = file.name;
   a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
+async function shareCanvas(cv, name, btn) {
+  if (!cv.blob && btn) {
+    busy(btn, true);
+    for (let i = 0; !cv.blob && i < 50; i++) await new Promise((r) => setTimeout(r, 100));
+    busy(btn, false);
+  }
+  const blob = cv.blob;
+  if (!blob) return;
+  await shareFile(new File([blob], name, { type: "image/png" }));
 }
 
 async function drawResult() {
@@ -1394,6 +1834,10 @@ async function drawResult() {
 }
 
 function showResult() {
+  video = null;
+  $("share-video").lastChild.dataset.i18n = "video";
+  $("share-video").lastChild.textContent = t("video");
+  $("story-msg").classList.add("hidden");
   $("result").classList.remove("hidden");
   $("pacer-box").classList.toggle("hidden", !!run.sample);
   $("duo-box").classList.toggle("hidden", !pacer || !!run.sample);
@@ -1695,7 +2139,10 @@ function initArena() {
 function render() {
   applyI18n();
   if (pacer && $("pacer-banner")) $("pacer-banner").textContent = t("pacer_invite", { name: pacer.name });
-  if ($("league")) renderLanding();
+  if ($("league")) {
+    renderLanding();
+    renderHistory();
+  }
   if ($("p-negara")) renderArena();
 }
 
@@ -1720,6 +2167,12 @@ if ($("form")) {
   $("share-duo").addEventListener("click", (e) => shareCanvas($("duo"), "thesirun-duel.png", e.currentTarget));
   $("pacer").addEventListener("click", () => shareLink(pacerUrl(run), t("pacer_text"), $("pacer-msg")));
   $("replay").addEventListener("click", openStory);
+  $("share-video").addEventListener("click", (e) => shareVideo(e.currentTarget));
+  $("share-story").addEventListener("click", () => shareLink(storyUrl(run), t("story_text"), $("story-msg")));
+  $("history-clear").addEventListener("click", () => {
+    store.set("history", "[]");
+    renderHistory();
+  });
   $("close").addEventListener("click", closeStory);
   $("prev").addEventListener("click", () => show(idx - 1));
   $("next").addEventListener("click", next);
@@ -1739,6 +2192,11 @@ if ($("form")) {
   if (pacer) {
     $("pacer-banner").classList.remove("hidden");
     $("run").scrollIntoView();
+  }
+  const shared = readStory();
+  if (shared) {
+    run = shared;
+    loadStats().then(openStory);
   }
 }
 
