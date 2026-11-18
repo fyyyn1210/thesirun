@@ -1746,4 +1746,5 @@ if ($("p-negara")) initArena();
 
 hydrate();
 render();
+if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(() => {}));
 loadStats().then(render);
