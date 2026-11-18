@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>ThesiRun · Arena</title>
+  <meta name="theme-color" content="#4A90F0">
+  <meta property="og:title" content="ThesiRun Arena · five-nation thesis run">
+  <meta property="og:image" content="https://thesirun.embarko.app/og.png">
+  <link rel="preload" href="/fonts/Figtree-Variable.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/BricolageGrotesque-Variable.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/app.css">
+  <script src="/app.js" defer></script>
+</head>
+<body class="min-h-dvh overflow-x-hidden bg-sky font-sans text-night antialiased">
+  <header class="mx-auto flex max-w-6xl items-center justify-between gap-2 px-4 py-3 lg:px-8">
+    <a href="/" class="font-display text-2xl font-extrabold tracking-tight text-white">ThesiRun</a>
+    <nav class="flex items-center gap-1" aria-label="Main">
+      <a href="/#run" class="navlink"><span data-icon="play" class="size-4"></span><span data-i18n="nav_run"></span></a>
+      <a href="/how-i-built-this/" class="navlink max-md:hidden"><span data-icon="code" class="size-[18px]"></span>How I built this</a>
+      <button id="lang" type="button" class="h-11 min-w-11 rounded-full bg-night px-4 text-sm font-bold text-white transition duration-200 hover:-translate-y-0.5 hover:bg-slate active:scale-95">EN</button>
+    </nav>
+  </header>
+
+  <section class="mx-auto grid max-w-6xl items-end px-4 lg:grid-cols-[minmax(0,1fr)_26rem] lg:gap-10 lg:px-8">
+    <div class="grid gap-3 pb-5">
+      <p class="kicker" data-i18n="arena_kicker"></p>
+      <h1 class="display text-[clamp(3.5rem,15vw,6rem)] text-white">Arena</h1>
+      <p class="max-w-xl text-lg font-medium" data-i18n="board_sub"></p>
+    </div>
+    <div id="arena-art" class="-mx-4 aspect-[39/25] lg:mx-0" aria-hidden="true"></div>
+  </section>
+
+  <div class="mx-auto max-w-6xl px-4 pb-5 lg:px-8">
+    <div role="tablist" aria-label="Arena" class="grid grid-cols-4 gap-1 rounded-full bg-night p-1 sm:max-w-xl">
+      <button role="tab" id="tab-negara" aria-controls="p-negara" aria-selected="true" class="tab" data-tab="negara"><span data-icon="globe" class="size-4 max-sm:hidden"></span><span data-i18n="tab_country"></span></button>
+      <button role="tab" id="tab-kampus" aria-controls="p-kampus" aria-selected="false" class="tab" data-tab="kampus"><span data-icon="campus" class="size-4 max-sm:hidden"></span><span data-i18n="tab_campus"></span></button>
+      <button role="tab" id="tab-compare" aria-controls="p-compare" aria-selected="false" class="tab" data-tab="compare"><span data-icon="swap" class="size-4 max-sm:hidden"></span><span data-i18n="tab_compare"></span></button>
+      <button role="tab" id="tab-personal" aria-controls="p-personal" aria-selected="false" class="tab" data-tab="personal"><span data-icon="users" class="size-4 max-sm:hidden"></span><span data-i18n="tab_personal"></span></button>
+    </div>
+  </div>
+
+  <main class="sheet min-h-[60dvh] pb-16">
+    <div class="mx-auto max-w-6xl px-4 pt-6 lg:px-8 lg:pt-10">
+
+      <section id="p-negara" role="tabpanel" aria-labelledby="tab-negara" class="grid gap-4 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start lg:gap-8">
+        <div class="grid gap-4">
+          <div id="metric-country" class="flex flex-wrap gap-2" aria-label="Metric"></div>
+          <div class="flex items-baseline justify-between gap-3">
+            <h2 class="h2" data-i18n="league_country"></h2>
+            <span id="metric-country-label" class="text-sm font-bold text-slate"></span>
+          </div>
+          <ol id="league-country" class="card grid px-3.5 py-1"></ol>
+          <p class="text-sm text-slate" data-i18n="league_note"></p>
+        </div>
+        <div class="grid gap-3">
+          <div id="daily-box" class="hidden rounded-3xl bg-night p-5 text-paper">
+            <p class="kicker flex items-center gap-2 text-butter"><span data-icon="trophy" class="size-4"></span><span data-i18n="yesterday_champ"></span></p>
+            <p id="daily" class="mt-2 font-bold"></p>
+          </div>
+          <a href="#compare" data-goto="compare" class="lift flex items-center justify-between gap-4 rounded-3xl bg-butter p-5">
+            <span><b class="block font-display text-2xl font-extrabold tracking-tight" data-i18n="cmp_title"></b><span class="text-sm" data-i18n="cmp_sub"></span></span>
+            <span class="round nudge text-butter" aria-hidden="true"><span data-icon="swap" class="size-5"></span></span>
+          </a>
+          <a href="/#run" id="cta-team" class="btn btn-primary"><span data-icon="play" class="size-5 text-butter"></span><span></span></a>
+        </div>
+      </section>
+
+      <section id="p-kampus" role="tabpanel" aria-labelledby="tab-kampus" class="hidden gap-4">
+        <div id="filter-campus" class="flex flex-wrap gap-2" aria-label="Country"></div>
+        <div id="metric-campus" class="flex flex-wrap gap-2" aria-label="Metric"></div>
+        <h2 class="h2" data-i18n="league_campus"></h2>
+        <ol id="league-campus" class="card grid px-3.5 py-1"></ol>
+        <p id="no-campus" class="hidden rounded-3xl bg-pink p-5 font-bold" data-i18n="no_campus"></p>
+        <p class="text-sm text-slate" data-i18n="campus_note"></p>
+        <a href="/#run" class="btn btn-primary sm:justify-self-start"><span data-icon="campus" class="size-5 text-butter"></span><span data-i18n="invite_campus"></span></a>
+      </section>
+
+      <section id="p-compare" role="tabpanel" aria-labelledby="tab-compare" class="hidden gap-4 lg:grid-cols-[24rem_minmax(0,1fr)] lg:items-start lg:gap-8">
+        <div class="grid gap-4">
+          <div id="cmp-mode" class="grid grid-cols-2 gap-1 rounded-full bg-cloud p-1"></div>
+          <div class="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-1.5">
+            <div id="cmp-a" class="grid min-h-44 content-start gap-2 self-stretch rounded-3xl p-3 shadow-drop transition-colors duration-300">
+              <span id="cmp-a-code" class="team justify-self-start bg-night text-white"></span>
+              <b id="cmp-a-name" class="font-display text-2xl leading-[0.95] font-extrabold tracking-tight break-words"></b>
+              <label for="sel-a" class="sr-only" data-i18n="side_a"></label>
+              <select id="sel-a" class="mt-auto"></select>
+            </div>
+            <button id="swap" type="button" class="round text-butter transition-transform duration-300 hover:rotate-180" data-i18n-aria="swap"><span data-icon="swap" class="size-6"></span></button>
+            <div id="cmp-b" class="grid min-h-44 content-start gap-2 self-stretch rounded-3xl p-3 shadow-drop transition-colors duration-300">
+              <span id="cmp-b-code" class="team justify-self-start bg-night text-white"></span>
+              <b id="cmp-b-name" class="font-display text-2xl leading-[0.95] font-extrabold tracking-tight break-words"></b>
+              <label for="sel-b" class="sr-only" data-i18n="side_b"></label>
+              <select id="sel-b" class="mt-auto"></select>
+            </div>
+          </div>
+          <div>
+            <p class="kicker mb-2" data-i18n="popular"></p>
+            <div id="cmp-quick" class="flex flex-wrap gap-2"></div>
+          </div>
+        </div>
+        <div class="grid gap-3">
+          <div class="flex items-baseline justify-between gap-3">
+            <h2 class="h2">Head to head</h2>
+            <span id="cmp-score" class="font-display text-2xl font-extrabold tabular-nums"></span>
+          </div>
+          <ol id="cmp-rows" class="grid gap-2"></ol>
+          <p id="cmp-note" class="text-sm text-slate"></p>
+          <button id="cmp-share" type="button" class="btn btn-primary"><span data-icon="share" class="size-5 text-butter"></span><span></span></button>
+          <p id="cmp-msg" class="hidden text-sm font-bold break-all" role="status"></p>
+        </div>
+      </section>
+
+      <section id="p-personal" role="tabpanel" aria-labelledby="tab-personal" class="hidden gap-4 lg:grid-cols-2 lg:items-start lg:gap-8">
+        <div class="grid gap-4 rounded-3xl bg-night p-5 text-paper lg:p-8">
+          <div id="duel-art" class="-mx-2 aspect-[39/22]" aria-hidden="true"></div>
+          <h2 class="font-display text-3xl font-extrabold tracking-tight" data-i18n="duel_title"></h2>
+          <p class="text-mist" data-i18n="duel_body"></p>
+          <button id="duel-share" type="button" class="btn bg-butter text-night shadow-press"><span data-icon="link" class="size-5"></span><span></span></button>
+          <p id="duel-msg" class="hidden text-sm font-bold break-all" role="status"></p>
+        </div>
+        <div class="grid gap-3">
+          <h2 class="h2" data-i18n="duel_history"></h2>
+          <ol id="duel-list" class="card grid px-3.5 py-1"></ol>
+          <p id="duel-empty" class="rounded-3xl bg-cloud p-5 font-bold" data-i18n="duel_empty"></p>
+          <p class="text-sm text-slate" data-i18n="duel_privacy"></p>
+        </div>
+      </section>
+
+      <footer class="mt-16 flex flex-wrap items-center justify-between gap-3 border-t-2 border-line pt-6 text-sm font-bold">
+        <p>Marathon by ThesiRun · Built with AI · #ThesisMarathon</p>
+        <a href="/how-i-built-this/" class="inline-flex min-h-11 items-center underline underline-offset-4">How I built this</a>
+      </footer>
+    </div>
+  </main>
+</body>
+</html>

@@ -2,28 +2,245 @@
 <html lang="id">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>ThesiRun</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>ThesiRun · Share your thesis like a run</title>
+  <meta name="description" content="Turn your thesis journey into a running recap. Five-nation thesis run: Indonesia, India, China, USA, Japan.">
+  <meta name="theme-color" content="#4A90F0">
+  <meta property="og:title" content="ThesiRun · Share your thesis like a run">
+  <meta property="og:description" content="Pages = distance. Revisions = elevation. Five nations, one thesis run.">
+  <meta property="og:image" content="https://thesirun.embarko.app/og.png">
+  <meta property="og:url" content="https://thesirun.embarko.app/">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="preload" href="/fonts/Figtree-Variable.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/BricolageGrotesque-Variable.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="icon" href="data:,">
   <link rel="stylesheet" href="/app.css">
   <script src="/app.js" defer></script>
 </head>
-<body class="min-h-dvh bg-neutral-950 text-neutral-100 font-sans">
-  <main class="mx-auto max-w-md px-4 py-10">
-    <h1 class="text-4xl font-black tracking-tight">ThesiRun</h1>
-    <p class="mt-2 text-neutral-400">Share your thesis like a run.</p>
+<body class="min-h-dvh overflow-x-hidden bg-sky font-sans text-night antialiased">
+  <header class="mx-auto flex max-w-6xl items-center justify-between gap-2 px-4 py-3 lg:px-8">
+    <a href="/" class="font-display text-2xl font-extrabold tracking-tight text-white">ThesiRun</a>
+    <nav class="flex items-center gap-1" aria-label="Main">
+      <a href="/board/" class="navlink"><span data-icon="trophy" class="size-[18px]"></span><span data-i18n="nav_arena"></span></a>
+      <a href="/board/#compare" class="navlink max-sm:hidden"><span data-icon="swap" class="size-[18px]"></span><span data-i18n="nav_compare"></span></a>
+      <a href="/how-i-built-this/" class="navlink max-md:hidden"><span data-icon="code" class="size-[18px]"></span>How I built this</a>
+      <button id="lang" type="button" class="h-11 min-w-11 rounded-full bg-night px-4 text-sm font-bold text-white transition duration-200 hover:-translate-y-0.5 hover:bg-slate active:scale-95">EN</button>
+    </nav>
+  </header>
 
-    <section class="mt-8 grid grid-cols-2 gap-3">
-      <div class="rounded-2xl bg-neutral-900 p-4">
-        <div class="text-sm text-neutral-400">🇮🇩 Indonesia</div>
-        <div id="n-ID" class="mt-1 text-3xl font-bold">0</div>
-        <div class="text-xs text-neutral-500">runners</div>
+  <section id="landing" class="mx-auto grid max-w-6xl items-center px-4 pb-8 lg:grid-cols-2 lg:gap-10 lg:px-8 lg:pb-14">
+    <div id="hero-art" class="-mx-4 aspect-[39/34] lg:order-2 lg:mx-0" aria-hidden="true"></div>
+    <div class="grid gap-4">
+      <span class="team h-8 justify-self-start bg-butter px-3">THESIS RUN 2026</span>
+      <h1 class="display text-[clamp(3.5rem,16vw,6.5rem)] text-white" data-i18n="hero_title"></h1>
+      <p class="max-w-xl text-lg font-medium lg:text-xl" data-i18n="hero_sub"></p>
+      <div class="grid gap-3 pt-1 sm:flex">
+        <a href="#run" class="btn btn-primary"><span data-icon="play" class="size-5 text-butter"></span><span data-i18n="start"></span></a>
+        <button type="button" class="btn btn-light" data-sample><span data-icon="replay" class="size-5"></span><span data-i18n="sample_btn"></span></button>
       </div>
-      <div class="rounded-2xl bg-neutral-900 p-4">
-        <div class="text-sm text-neutral-400">🇮🇳 India</div>
-        <div id="n-IN" class="mt-1 text-3xl font-bold">0</div>
-        <div class="text-xs text-neutral-500">runners</div>
+      <p class="text-sm font-bold" data-i18n="alumni"></p>
+    </div>
+  </section>
+
+  <main class="sheet pb-16">
+    <div class="mx-auto max-w-6xl px-4 pt-7 lg:px-8 lg:pt-12">
+      <section aria-labelledby="score-title" class="grid gap-4" data-reveal>
+        <div class="flex items-end justify-between gap-3">
+          <div>
+            <p class="kicker text-slate" data-i18n="live_kicker"></p>
+            <h2 id="score-title" class="h2 mt-1" data-i18n="live_title"></h2>
+          </div>
+          <a href="/board/" class="inline-flex min-h-11 shrink-0 items-center text-sm font-extrabold underline underline-offset-4" data-i18n="see_arena"></a>
+        </div>
+        <ol id="league" class="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5"></ol>
+        <div id="cold" class="card hidden shadow-drop">
+          <p class="text-lg font-extrabold" data-i18n="cold_title"></p>
+          <p class="mt-1 text-sm text-slate" data-i18n="cold_body"></p>
+          <div id="cold-bars" class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5"></div>
+        </div>
+        <p id="daily" class="hidden rounded-2xl bg-butter px-5 py-3 font-bold"></p>
+        <a href="/board/#compare" class="lift flex items-center justify-between gap-4 rounded-3xl bg-night p-5 text-paper shadow-drop">
+          <span>
+            <span class="kicker block text-butter" data-i18n="cmp_kicker"></span>
+            <span class="mt-1 block font-display text-2xl font-extrabold tracking-tight" data-i18n="cmp_title"></span>
+            <span class="mt-1 block text-sm text-mist" data-i18n="cmp_sub"></span>
+          </span>
+          <span class="nudge grid size-12 shrink-0 place-items-center rounded-full bg-butter text-night" aria-hidden="true"><span data-icon="swap" class="size-6"></span></span>
+        </a>
+      </section>
+
+      <div class="-mx-4 mt-10 overflow-hidden py-1 lg:-mx-8" aria-hidden="true">
+        <div class="flex w-max animate-marquee gap-2 text-[15px] font-extrabold">
+          <span class="rounded-full bg-butter px-4 py-2">Revisi</span><span class="rounded-full bg-pink px-4 py-2">Begadang</span><span class="rounded-full bg-white px-4 py-2">Kopi</span><span class="rounded-full bg-lilac px-4 py-2">ACC</span><span class="rounded-full bg-night px-4 py-2 text-white">Sidang</span><span class="rounded-full bg-saffron px-4 py-2">Viva</span><span class="rounded-full bg-tomato px-4 py-2">Bishe</span><span class="rounded-full bg-cloud px-4 py-2">Sotsuron</span><span class="rounded-full bg-butter px-4 py-2">Deadline</span><span class="rounded-full bg-pink px-4 py-2">Defense</span>
+          <span class="rounded-full bg-butter px-4 py-2">Revisi</span><span class="rounded-full bg-pink px-4 py-2">Begadang</span><span class="rounded-full bg-white px-4 py-2">Kopi</span><span class="rounded-full bg-lilac px-4 py-2">ACC</span><span class="rounded-full bg-night px-4 py-2 text-white">Sidang</span><span class="rounded-full bg-saffron px-4 py-2">Viva</span><span class="rounded-full bg-tomato px-4 py-2">Bishe</span><span class="rounded-full bg-cloud px-4 py-2">Sotsuron</span><span class="rounded-full bg-butter px-4 py-2">Deadline</span><span class="rounded-full bg-pink px-4 py-2">Defense</span>
+        </div>
       </div>
-    </section>
+
+      <section class="mt-10" aria-labelledby="how-title" data-reveal>
+        <h2 id="how-title" class="h2" data-i18n="how_title"></h2>
+        <ol class="mt-4 grid gap-3 lg:grid-cols-3">
+          <li class="card lift flex items-center gap-4"><span class="grid size-11 shrink-0 place-items-center rounded-2xl bg-butter font-display text-2xl font-extrabold">1</span><span><b class="block" data-i18n="how_1"></b><span class="text-sm text-slate" data-i18n="how_1s"></span></span></li>
+          <li class="card lift flex items-center gap-4"><span class="grid size-11 shrink-0 place-items-center rounded-2xl bg-pink font-display text-2xl font-extrabold">2</span><span><b class="block" data-i18n="how_2"></b><span class="text-sm text-slate" data-i18n="how_2s"></span></span></li>
+          <li class="card lift flex items-center gap-4"><span class="grid size-11 shrink-0 place-items-center rounded-2xl bg-lilac font-display text-2xl font-extrabold">3</span><span><b class="block" data-i18n="how_3"></b><span class="text-sm text-slate" data-i18n="how_3s"></span></span></li>
+        </ol>
+      </section>
+
+      <section id="run" class="scroll-mt-4 pt-12">
+        <p id="pacer-banner" class="mb-6 hidden rounded-3xl bg-pink p-5 text-xl font-extrabold"></p>
+        <div data-reveal><p class="kicker text-slate" data-i18n="form_kicker"></p>
+        <h2 class="h2 mt-1" data-i18n="form_title"></h2>
+        <p class="mt-2 text-slate" data-i18n="form_sub"></p></div>
+
+        <form id="form" class="mt-6 grid gap-4 lg:grid-cols-2" novalidate>
+          <div class="card grid content-start gap-6 p-5 shadow-drop" data-reveal>
+            <h3 class="flex items-center gap-3 text-lg font-extrabold"><span class="grid size-9 place-items-center rounded-full bg-night font-display text-butter">1</span><span data-i18n="g_profile"></span></h3>
+            <div>
+              <label for="name" class="label"><span data-i18n="f_name"></span> <span class="font-medium text-slate" data-i18n="local_only"></span></label>
+              <input id="name" name="name" maxlength="20" autocomplete="nickname" class="field">
+            </div>
+            <fieldset>
+              <legend class="label" data-i18n="f_country"></legend>
+              <div class="flex flex-wrap gap-2">
+                <label class="chip"><input type="radio" name="country" value="ID" class="sr-only" required><span class="size-3 rounded-full bg-tomato" aria-hidden="true"></span><span data-i18n="c_ID"></span></label>
+                <label class="chip"><input type="radio" name="country" value="IN" class="sr-only"><span class="size-3 rounded-full bg-saffron" aria-hidden="true"></span><span data-i18n="c_IN"></span></label>
+                <label class="chip"><input type="radio" name="country" value="CN" class="sr-only"><span class="size-3 rounded-full bg-pink" aria-hidden="true"></span><span data-i18n="c_CN"></span></label>
+                <label class="chip"><input type="radio" name="country" value="US" class="sr-only"><span class="size-3 rounded-full bg-lilac" aria-hidden="true"></span><span data-i18n="c_US"></span></label>
+                <label class="chip"><input type="radio" name="country" value="JP" class="sr-only"><span class="size-3 rounded-full bg-butter" aria-hidden="true"></span><span data-i18n="c_JP"></span></label>
+                <label class="chip"><input type="radio" name="country" value="OT" class="sr-only"><span class="size-3 rounded-full bg-cloud ring-1 ring-night/30" aria-hidden="true"></span><span data-i18n="c_OT"></span></label>
+              </div>
+            </fieldset>
+            <div>
+              <label for="campus" class="label" data-i18n="f_campus"></label>
+              <input id="campus" name="campus" maxlength="60" list="campuses" autocomplete="off" class="field">
+              <datalist id="campuses"></datalist>
+            </div>
+            <fieldset>
+              <legend class="label" data-i18n="f_degree"></legend>
+              <div class="flex flex-wrap gap-2">
+                <label class="chip"><input type="radio" name="degree" value="S1" class="sr-only" required><span data-i18n="deg_S1"></span></label>
+                <label class="chip"><input type="radio" name="degree" value="DIP" class="sr-only"><span data-i18n="deg_DIP"></span></label>
+                <label class="chip"><input type="radio" name="degree" value="S2" class="sr-only"><span data-i18n="deg_S2"></span></label>
+                <label class="chip"><input type="radio" name="degree" value="ALUM" class="sr-only"><span data-i18n="deg_ALUM"></span></label>
+              </div>
+            </fieldset>
+          </div>
+
+          <div class="card grid content-start gap-6 p-5 shadow-drop" data-reveal>
+            <h3 class="flex items-center gap-3 text-lg font-extrabold"><span class="grid size-9 place-items-center rounded-full bg-night font-display text-butter">2</span><span data-i18n="g_progress"></span></h3>
+            <fieldset>
+              <legend class="label" data-i18n="f_status"></legend>
+              <div id="status" class="flex flex-wrap gap-2"></div>
+            </fieldset>
+            <div>
+              <label for="start-month" class="label" data-i18n="f_start"></label>
+              <input id="start-month" name="start" type="hidden" data-month>
+            </div>
+            <fieldset>
+              <legend class="label" data-i18n="f_sleep"></legend>
+              <div id="sleep" class="flex flex-wrap gap-2"></div>
+            </fieldset>
+          </div>
+
+          <div class="card grid gap-x-8 gap-y-5 p-5 shadow-drop lg:col-span-2 lg:grid-cols-2" data-reveal>
+            <h3 class="flex items-center gap-3 text-lg font-extrabold lg:col-span-2"><span class="grid size-9 place-items-center rounded-full bg-night font-display text-butter">3</span><span data-i18n="g_numbers"></span></h3>
+            <div data-range="pages" data-max="300" data-value="60"></div>
+            <div data-range="revisions" data-max="50" data-value="5"></div>
+            <div data-range="reply_days" data-max="30" data-value="3"></div>
+            <div data-range="coffee" data-max="50" data-value="7"></div>
+            <div data-stepper="title_changes" data-max="10"></div>
+            <div data-stepper="approvals" data-max="30"></div>
+          </div>
+
+          <div class="card grid gap-x-8 gap-y-5 p-5 shadow-drop lg:col-span-2 lg:grid-cols-2" data-reveal>
+            <h3 class="flex items-center gap-3 text-lg font-extrabold lg:col-span-2"><span class="grid size-9 place-items-center rounded-full bg-night font-display text-butter">4</span><span data-i18n="g_personal"></span></h3>
+            <div>
+              <label for="song" class="label" data-i18n="f_song"></label>
+              <input id="song" name="song" maxlength="40" autocomplete="off" class="field">
+            </div>
+            <fieldset>
+              <legend class="label" data-i18n="f_phrase"></legend>
+              <div id="phrases" class="flex flex-wrap gap-2"></div>
+              <input id="phrase-custom" name="phrase_custom" maxlength="40" autocomplete="off" class="field mt-3" data-i18n-ph="phrase_custom">
+            </fieldset>
+            <label class="flex cursor-pointer items-start gap-4 rounded-3xl bg-cloud p-4 lg:col-span-2">
+              <input id="share" name="share" type="checkbox" checked class="peer sr-only">
+              <span class="relative mt-1 h-8 w-13 shrink-0 rounded-full bg-slate/40 transition duration-300 peer-checked:bg-night peer-focus-visible:ring-4 peer-focus-visible:ring-sky after:absolute after:top-1 after:left-1 after:size-6 after:rounded-full after:bg-white after:transition after:duration-300 after:ease-spring peer-checked:after:translate-x-5 peer-checked:after:bg-butter"></span>
+              <span>
+                <span class="block font-extrabold" data-i18n="f_share"></span>
+                <span class="mt-1 block text-sm text-slate" data-i18n="privacy"></span>
+              </span>
+            </label>
+          </div>
+
+          <div class="absolute -left-[9999px] h-px w-px overflow-hidden" aria-hidden="true">
+            <label for="website">Website</label>
+            <input id="website" name="website" tabindex="-1" autocomplete="off">
+          </div>
+
+          <div class="grid gap-3 lg:col-span-2 lg:flex lg:items-center lg:justify-end">
+            <p id="form-error" class="hidden rounded-2xl bg-tomato px-4 py-3 font-bold lg:mr-auto" role="alert"></p>
+            <button class="btn btn-primary px-10"><span data-icon="play" class="size-5 text-butter"></span><span data-i18n="go"></span></button>
+          </div>
+        </form>
+      </section>
+
+      <section id="result" class="hidden scroll-mt-4 pt-12">
+        <h2 class="h2" data-i18n="card_title"></h2>
+        <div class="mt-6 grid gap-8 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)] lg:items-start">
+          <div class="lg:sticky lg:top-4">
+            <canvas id="card" width="1080" height="1920" class="w-full rounded-3xl shadow-drop"></canvas>
+            <div class="mt-4 grid gap-3">
+              <button id="share-card" type="button" class="btn btn-primary"><span data-icon="share" class="size-5 text-butter"></span><span data-i18n="share"></span></button>
+              <button id="replay" type="button" class="btn btn-light"><span data-icon="replay" class="size-5"></span><span data-i18n="replay"></span></button>
+            </div>
+          </div>
+
+          <div class="grid content-start gap-4">
+            <div id="pacer-box" class="rounded-3xl bg-pink p-5 lg:p-8">
+              <p class="kicker" data-i18n="pacer_kicker"></p>
+              <h3 class="mt-1 font-display text-3xl font-extrabold tracking-tight lg:text-4xl" data-i18n="pacer_title"></h3>
+              <p class="mt-2 font-medium" data-i18n="pacer_body"></p>
+              <button id="pacer" type="button" class="btn btn-primary mt-4"><span data-icon="link" class="size-5 text-butter"></span><span data-i18n="pacer_btn"></span></button>
+              <p id="pacer-msg" class="mt-2 hidden text-sm font-bold break-all" role="status"></p>
+            </div>
+
+            <div id="duo-box" class="card hidden p-5 shadow-drop">
+              <h3 class="font-display text-2xl font-extrabold tracking-tight" data-i18n="duo_title"></h3>
+              <canvas id="duo" width="1080" height="1920" class="mt-4 w-full max-w-xs rounded-3xl"></canvas>
+              <button id="share-duo" type="button" class="btn btn-primary mt-4"><span data-icon="share" class="size-5 text-butter"></span><span data-i18n="share"></span></button>
+            </div>
+
+            <a href="/board/" class="lift flex items-center justify-between gap-4 rounded-3xl bg-night p-5 text-paper">
+              <span>
+                <span class="block font-display text-2xl font-extrabold tracking-tight" data-i18n="see_board"></span>
+                <span class="mt-1 block text-sm text-mist" data-i18n="board_sub"></span>
+              </span>
+              <span class="nudge grid size-12 shrink-0 place-items-center rounded-full bg-butter text-night" aria-hidden="true"><span data-icon="arrow" class="size-5"></span></span>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <footer class="mt-16 flex flex-wrap items-center justify-between gap-3 border-t-2 border-line pt-6 text-sm font-bold">
+        <p>Marathon by ThesiRun · Built with AI · #ThesisMarathon</p>
+        <a href="/how-i-built-this/" class="inline-flex min-h-11 items-center underline underline-offset-4">How I built this</a>
+      </footer>
+    </div>
   </main>
+
+  <div id="story" class="fixed inset-0 z-50 grid place-items-center bg-night/85 backdrop-blur-sm" hidden role="dialog" aria-modal="true" aria-label="ThesiRun story">
+    <div id="frame" class="@container relative h-full w-full overflow-hidden">
+      <div id="bars" class="absolute inset-x-3 top-3 z-20 flex gap-1"></div>
+      <span id="sample-tag" class="absolute top-7 left-4 z-20 hidden rounded-full bg-night px-3 py-1 text-xs font-extrabold tracking-widest text-butter">SAMPLE</span>
+      <button id="close" type="button" class="absolute top-6 right-3 z-20 grid size-11 place-items-center rounded-full bg-night/15 transition duration-200 hover:rotate-90 hover:bg-night/30 active:scale-90" aria-label="Close"><span data-icon="x" class="size-5"></span></button>
+      <div id="slide" class="absolute inset-0 flex flex-col justify-center px-6 pt-16 pb-24"></div>
+      <div class="absolute bottom-5 left-4 z-20 flex items-center gap-2">
+        <button id="prev" type="button" class="round" aria-label="Previous"><span data-icon="up" class="size-5"></span></button>
+        <span id="counter" class="min-w-11 text-center font-extrabold tabular-nums" aria-live="polite"></span>
+        <button id="next" type="button" class="round" aria-label="Next"><span data-icon="down" class="size-5"></span></button>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
