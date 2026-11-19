@@ -1,4 +1,5 @@
 import hashlib
+import hmac
 import json
 import os
 import re
@@ -350,6 +351,17 @@ async def get_stats():
         }
     _stats_cache[:] = [time.time(), data]
     return data
+
+
+@app.get("/tasks/daily-report")
+async def task_daily_report(request: Request):
+    secret = os.environ.get("CRON_SECRET", "")
+    if not secret or not hmac.compare_digest(request.headers.get("authorization", ""), "Bearer " + secret):
+        return err(401, "unauthorized")
+    with closing(connect()) as db:
+        rep = daily_report(db)
+    _stats_cache[0] = 0.0
+    return {"day": rep["day"], "winners": rep["winners"]}
 
 
 app.mount("/", StaticFiles(directory=os.path.join(os.path.dirname(__file__), "static"), html=True), name="static")

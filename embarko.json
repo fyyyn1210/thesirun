@@ -1,4 +1,12 @@
 {
   "$schema": "https://embarko.ai/schema/embarko.json",
-  "appId": "cmwnk001802dg66auvc3vbz53"
+  "appId": "cmwnk001802dg66auvc3vbz53",
+  "schedules": [
+    {
+      "cron": "0 0 * * *",
+      "path": "/tasks/daily-report",
+      "timezone": "UTC",
+      "name": "daily thesis run report"
+    }
+  ]
 }
