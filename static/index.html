@@ -90,6 +90,12 @@
         </ol>
       </section>
 
+      <section id="reviews" class="mt-10 hidden" aria-labelledby="reviews-title">
+        <h2 id="reviews-title" class="h2" data-i18n="rv_title"></h2>
+        <p class="mt-1 text-sm text-slate" data-i18n="rv_sub"></p>
+        <ul id="review-list" class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3"></ul>
+      </section>
+
       <section id="history" class="mt-10 hidden" aria-labelledby="history-title">
         <div class="flex items-end justify-between gap-3">
           <h2 id="history-title" class="h2" data-i18n="history_title"></h2>
@@ -101,6 +107,12 @@
 
       <section id="run" class="scroll-mt-4 pt-12">
         <p id="pacer-banner" class="mb-6 hidden rounded-3xl bg-pink p-5 text-xl font-extrabold"></p>
+        <div id="mine" class="mb-6 hidden rounded-3xl bg-butter p-5">
+          <p class="text-lg font-extrabold" data-i18n="mine_title"></p>
+          <p id="mine-body" class="mt-1 font-medium"></p>
+          <button id="mine-del" type="button" class="btn btn-light mt-4"><span data-icon="replay" class="size-5"></span><span data-i18n="mine_del"></span></button>
+        </div>
+        <p id="mine-msg" class="mb-6 hidden font-bold" role="status"></p>
         <div data-reveal><p class="kicker text-slate" data-i18n="form_kicker"></p>
         <h2 class="h2 mt-1" data-i18n="form_title"></h2>
         <p class="mt-2 text-slate" data-i18n="form_sub"></p></div>
@@ -219,6 +231,17 @@
               <p class="mt-2 font-medium" data-i18n="pacer_body"></p>
               <button id="pacer" type="button" class="btn btn-primary mt-4"><span data-icon="link" class="size-5 text-butter"></span><span data-i18n="pacer_btn"></span></button>
               <p id="pacer-msg" class="mt-2 hidden text-sm font-bold break-all" role="status"></p>
+            </div>
+
+            <div id="review-box" class="card hidden p-5 shadow-drop lg:p-8">
+              <p class="kicker text-slate" data-i18n="rv_kicker"></p>
+              <h3 class="mt-1 font-display text-3xl font-extrabold tracking-tight" data-i18n="rv_form_title"></h3>
+              <form id="review-form" class="mt-4 grid gap-3" novalidate>
+                <textarea id="review-body" maxlength="140" rows="3" required class="field h-auto resize-none py-3" data-i18n-ph="rv_ph" data-i18n-aria="rv_form_title"></textarea>
+                <label id="review-name-row" class="flex min-h-11 cursor-pointer items-center gap-3 font-semibold"><input id="review-name" type="checkbox" class="size-5 accent-night"><span id="review-name-label"></span></label>
+                <button id="review-send" class="btn btn-primary"><span data-icon="check" class="size-5 text-butter"></span><span data-i18n="rv_send"></span></button>
+              </form>
+              <p id="review-msg" class="mt-2 hidden text-sm font-bold" role="status"></p>
             </div>
 
             <div id="duo-box" class="card hidden p-5 shadow-drop">

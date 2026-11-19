@@ -1,6 +1,8 @@
+import hashlib
 import json
 import os
 import re
+import secrets
 import sqlite3
 import sys
 import time
@@ -43,6 +45,15 @@ CREATE TABLE IF NOT EXISTS runs (
 );
 CREATE INDEX IF NOT EXISTS idx_runs_country ON runs(country);
 CREATE INDEX IF NOT EXISTS idx_runs_campus  ON runs(campus);
+CREATE TABLE IF NOT EXISTS reviews (
+  id          INTEGER PRIMARY KEY,
+  run_id      INTEGER NOT NULL UNIQUE REFERENCES runs(id),
+  token_hash  TEXT    NOT NULL UNIQUE,
+  created_at  TEXT,
+  name        TEXT    CHECK (length(name) <= 40),
+  body        TEXT    CHECK (length(body) BETWEEN 10 AND 140),
+  hidden      INTEGER NOT NULL DEFAULT 0
+);
 CREATE TABLE IF NOT EXISTS daily_report (day TEXT PRIMARY KEY, json TEXT NOT NULL);
 """
 
@@ -51,6 +62,9 @@ METRICS = {"revisions": "revisions", "pages": "pages", "coffee": "coffee", "slee
 
 BLOCKLIST = {"anjing", "bangsat", "kontol", "memek", "ngentot", "fuck", "shit", "bitch", "chutiya", "madarchod", "bhenchod"}
 CAMPUS_RE = re.compile(r"^[A-Za-z0-9 .\-&]{3,60}$")
+MASK_RE = re.compile(r"^[^\W\d_]\*{3}( [^\W\d_]\*{3}){0,2}$")
+LINK_RE = re.compile(r"https?:|www\.|\.(com|net|org|id|io|co|xyz|ly|me)\b|@\w", re.I)
+MAX_REVIEWS = 12
 
 
 def Int(lo, hi):
@@ -72,6 +86,29 @@ class Run(BaseModel):
     coffee: int = Int(0, 50)
     sleep: int = Int(0, 4)
     website: str = ""
+
+
+class Token(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    token: str = Field(min_length=20, max_length=40)
+
+
+class Review(Token):
+    name: str | None = Field(default=None, max_length=40)
+    body: str = Field(max_length=400)
+
+
+def token_hash(token):
+    return hashlib.sha256(token.encode()).hexdigest()
+
+
+def clean_review(r: Review):
+    body = " ".join(r.body.split())
+    if not 10 <= len(body) <= 140 or LINK_RE.search(body) or any(w in body.lower() for w in BLOCKLIST):
+        return None
+    if r.name is not None and not MASK_RE.match(r.name):
+        return None
+    return r.name, body
 
 
 def normalize_campus(raw):
@@ -183,8 +220,7 @@ def err(status, msg):
     return JSONResponse({"error": msg}, status_code=status)
 
 
-@app.post("/api/run")
-async def post_run(request: Request):
+async def guarded_body(request: Request):
     if request.headers.get("origin") not in (ALLOWED_ORIGIN, f"{request.url.scheme}://{request.url.netloc}"):
         return err(403, "bad origin")
     if int(request.headers.get("content-length") or 0) > MAX_BODY:
@@ -194,6 +230,14 @@ async def post_run(request: Request):
         return err(413, "too large")
     if rate_limited(client_ip(request)):
         return err(429, "slow down")
+    return body
+
+
+@app.post("/api/run")
+async def post_run(request: Request):
+    body = await guarded_body(request)
+    if isinstance(body, JSONResponse):
+        return body
     try:
         r = Run.model_validate_json(body)
     except ValidationError:
@@ -203,21 +247,83 @@ async def post_run(request: Request):
     if os.environ.get("ACCEPT_RUNS", "1") == "0":
         return err(503, "submissions paused")
 
+    token = secrets.token_urlsafe(24)
     with closing(connect()) as db:
         with db:
-            db.execute(
+            cur = db.execute(
                 """INSERT INTO runs (country, campus, degree, chapters, days, pages, revisions,
                    title_changes, approvals, reply_days, coffee, sleep, persona)
                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)""",
                 (r.country, normalize_campus(r.campus), r.degree, r.chapters, r.days, r.pages, r.revisions,
                  r.title_changes, r.approvals, r.reply_days, r.coffee, r.sleep, persona(r)),
             )
+            db.execute("INSERT INTO reviews (run_id, token_hash) VALUES (?, ?)", (cur.lastrowid, token_hash(token)))
         _stats_cache[0] = 0.0
         values = {"revisions": r.revisions, "pages": r.pages, "coffee": r.coffee, "sleep": r.sleep,
                   "pace": r.days / max(r.chapters, 0.5)}
         n, pct = percentiles(db, values)
         country_n, country_pct = percentiles(db, values, r.country)
-    return {"n": n, "country_n": country_n, "percentiles": pct, "country_percentiles": country_pct, "persona": persona(r)}
+    return {"n": n, "country_n": country_n, "percentiles": pct, "country_percentiles": country_pct, "persona": persona(r),
+            "review_token": token}
+
+
+@app.post("/api/review")
+async def post_review(request: Request):
+    body = await guarded_body(request)
+    if isinstance(body, JSONResponse):
+        return body
+    try:
+        r = Review.model_validate_json(body)
+    except ValidationError:
+        return err(422, "invalid")
+    clean = clean_review(r)
+    if not clean:
+        return err(422, "invalid")
+    with closing(connect()) as db, db:
+        cur = db.execute(REVIEW_SQL, (*clean, token_hash(r.token)))
+    if cur.rowcount != 1:
+        return err(409, "already used")
+    _stats_cache[0] = 0.0
+    return {"ok": True}
+
+
+@app.post("/api/run/delete")
+async def post_run_delete(request: Request):
+    body = await guarded_body(request)
+    if isinstance(body, JSONResponse):
+        return body
+    try:
+        tok = Token.model_validate_json(body)
+    except ValidationError:
+        return err(422, "invalid")
+    with closing(connect()) as db, db:
+        ok = delete_run(db, tok.token)
+    if not ok:
+        return err(404, "not found")
+    _stats_cache[0] = 0.0
+    return {"ok": True}
+
+
+def delete_run(db, token):
+    row = db.execute("SELECT run_id FROM reviews WHERE token_hash = ?", (token_hash(token),)).fetchone()
+    if not row:
+        return False
+    db.execute("DELETE FROM reviews WHERE run_id = ?", (row[0],))
+    db.execute("DELETE FROM runs WHERE id = ?", (row[0],))
+    return True
+
+
+REVIEW_SQL = "UPDATE reviews SET name = ?, body = ?, created_at = datetime('now') WHERE token_hash = ? AND body IS NULL"
+
+
+def recent_reviews(db):
+    rows = db.execute(
+        """SELECT v.name, v.body, strftime('%Y-%m-%dT%H:%M:%SZ', v.created_at) created_at, r.country, r.degree, r.persona
+           FROM reviews v JOIN runs r ON r.id = v.run_id
+           WHERE v.body IS NOT NULL AND v.hidden = 0 ORDER BY v.created_at DESC, v.id DESC LIMIT ?""",
+        (MAX_REVIEWS,),
+    ).fetchall()
+    return [dict(x) for x in rows]
 
 
 @app.get("/api/stats")
@@ -237,6 +343,7 @@ async def get_stats():
             "countries": country_aggs(db),
             "campuses": [dict(c) for c in campuses],
             "daily": json.loads(daily["json"]) if daily else None,
+            "reviews": recent_reviews(db),
         }
     _stats_cache[:] = [time.time(), data]
     return data
@@ -319,14 +426,45 @@ def selftest():
         db.execute("UPDATE runs SET created_at = datetime('now', '-1 day')")
         rep = daily_report(db)
         assert rep["winners"]["pages"] == "JP" and rep["winners"]["runners"] == "ID" and rep["winners"]["revisions"] == "JP"
+    assert MASK_RE.match("R***") and MASK_RE.match("R*** P***") and MASK_RE.match("É***")
+    for bad in ["Rio", "R***o", "R** P***", "1***", "R*** P*** S*** T***", "<***"]:
+        assert not MASK_RE.match(bad), bad
+    rv = lambda **k: clean_review(Review(**{"token": "x" * 32, "name": None, "body": "Seru banget, jadi semangat lagi", **k}))
+    assert rv() == (None, "Seru banget, jadi semangat lagi")
+    assert rv(body="  spasi   banyak   sekali  ") == (None, "spasi banyak sekali")
+    for bad in [dict(body="pendek"), dict(body="x" * 141), dict(body="cek https://spam.example ya"), dict(body="mampir ke toko.com dong"),
+                dict(body="follow @akunspam sekarang"), dict(body="dospem gw anjing banget"), dict(name="Rio Putra")]:
+        assert rv(**bad) is None, bad
+    with closing(connect()) as db:
+        db.execute("DELETE FROM runs")
+        rid = db.execute(ins, ("ID", "S1", 1, 10, 0, 0)).lastrowid
+        db.execute("INSERT INTO reviews (run_id, token_hash) VALUES (?, ?)", (rid, token_hash("tok")))
+        assert db.execute(REVIEW_SQL, ("R***", "Mantap sekali aplikasinya", token_hash("tok"))).rowcount == 1
+        assert db.execute(REVIEW_SQL, ("R***", "Review kedua harus ditolak", token_hash("tok"))).rowcount == 0
+        assert db.execute(REVIEW_SQL, (None, "Token palsu harus ditolak", token_hash("nope"))).rowcount == 0
+        got = recent_reviews(db)
+        assert len(got) == 1 and got[0]["name"] == "R***" and got[0]["country"] == "ID" and got[0]["created_at"].endswith("Z")
+        db.execute("UPDATE reviews SET hidden = 1")
+        assert recent_reviews(db) == []
+        assert not delete_run(db, "nope")
+        assert delete_run(db, "tok")
+        assert db.execute("SELECT COUNT(*) FROM runs").fetchone()[0] == 0 and db.execute("SELECT COUNT(*) FROM reviews").fetchone()[0] == 0
+        assert not delete_run(db, "tok")
     print("selftest ok")
 
 
 if __name__ == "__main__":
     if "--selftest" in sys.argv:
         selftest()
+    elif "--reviews" in sys.argv:
+        with closing(connect()) as db:
+            for x in db.execute("SELECT id, hidden, created_at, name, body FROM reviews WHERE body IS NOT NULL ORDER BY id DESC LIMIT 50"):
+                print(*x, sep=" | ")
+    elif "--hide-review" in sys.argv:
+        with closing(connect()) as db, db:
+            print(db.execute("UPDATE reviews SET hidden = 1 WHERE id = ?", (int(sys.argv[-1]),)).rowcount)
     elif "--daily-report" in sys.argv:
         with closing(connect()) as db:
             print(json.dumps(daily_report(db)))
     else:
-        print("usage: python main.py --selftest | --daily-report")
+        print("usage: python main.py --selftest | --daily-report | --reviews | --hide-review ID")

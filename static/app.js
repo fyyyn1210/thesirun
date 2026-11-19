@@ -55,9 +55,17 @@ const I18N = {
     ph_0: "Mohon maaf mengganggu waktunya", ph_1: "Izin bertanya, Pak/Bu", ph_2: "Sudah saya revisi sesuai arahan", ph_3: "Kapan bisa bimbingan lagi?",
     phrase_custom: "Atau tulis sendiri", f_share: "Ikut statistik global (anonim)",
     privacy: "Yang dikirim hanya angka, negara, jenjang, dan kampus. Nama, lagu, kalimat, dan IP tidak disimpan.",
-    go: "Lihat lari skripsiku", sending: "Menghitung…", pick_month: "Pilih bulan", this_month: "Bulan ini", prev_year: "Tahun sebelumnya", next_year: "Tahun berikutnya", err_required: "Pilih tim, jenjang, posisi, dan bulan mulai dulu ya.",
+    go: "Lihat lari skripsiku", sending: "Menghitung…", pick_month: "Pilih bulan", this_month: "Bulan ini", prev_year: "Tahun sebelumnya", next_year: "Tahun berikutnya", err_required: "Belum diisi: {list}.", miss_country: "tim", miss_degree: "jenjang", miss_status: "posisi", miss_start: "bulan mulai", and: "dan",
     video: "Download video story", video_busy: "Membuat video… {p}%", video_share: "Bagikan video", video_no: "Browser ini belum bisa membuat video. Coba Chrome atau Safari terbaru.",
     video_end: "Bikin lari skripsimu di", story_link: "Bagikan link story", story_text: "Lihat lari skripsiku di ThesiRun!", make_mine: "Bikin punyaku",
+    s8k_off: "Kamu menulis", s8s_off: "untuk {team}, tapi belum masuk liga.", off_dup: "Kamu sudah punya lari di liga. Hapus dulu di form untuk mulai dari 0.",
+    off_private: "Kamu memilih tidak membagikan data, jadi lari ini tidak dihitung.", off_fail: "Gagal terkirim ke server, jadi lari ini tidak dihitung.", off_deleted: "Lari ini sudah kamu hapus dari liga.",
+    mine_title: "Lari kamu sudah masuk liga", mine_body: "Tim {team} · {pages} halaman. Satu orang satu lari. Mau mulai dari 0? Hapus lari ini beserta review-mu, lalu isi lagi.",
+    mine_del: "Hapus lari & review", mine_confirm: "Hapus lari dan review-mu dari liga? Ini tidak bisa dibatalkan.", mine_done: "Terhapus. Kamu bisa isi lari baru dan review lagi.",
+    rv_title: "Apa kata mereka", rv_sub: "Ditulis runner ThesiRun sendiri. Satu lari, satu review.", rv_anon: "Runner anonim",
+    rv_kicker: "Satu lari, satu review", rv_form_title: "Gimana rasanya?", rv_ph: "Ceritain pengalamanmu pakai ThesiRun (10–140 karakter)",
+    rv_show_name: "Tampilkan namaku sebagai {mask}", rv_send: "Kirim review", rv_thanks: "Makasih! Review-mu sudah tampil di beranda.",
+    rv_bad: "Review ditolak. Tulis 10–140 karakter, tanpa link atau kata kasar.", rv_used: "Lari ini sudah pernah dipakai untuk review.", rv_slow: "Terlalu sering. Coba lagi sejam lagi ya.", rv_fail: "Gagal mengirim. Cek koneksi lalu coba lagi.",
     history_title: "Riwayat lari", history_sub: "Tersimpan di browser ini saja.", history_clear: "Hapus riwayat", history_meta: "{date} · {pages} halaman",
     card_title: "Kartu lari-mu", share: "Bagikan / Download", replay: "Putar ulang story",
     duo_title: "Kartu duo pacer", pacer_kicker: "Cari pacer", pacer_title: "Tantang teman", pacer_body: "Kirim link ke teman. Mereka isi, kalian dapat skor duel dan kecocokan.",
@@ -120,9 +128,17 @@ const I18N = {
     ph_0: "Sorry to bother you", ph_1: "Just following up on my draft", ph_2: "Revised as per your feedback", ph_3: "When can we meet again?",
     phrase_custom: "Or write your own", f_share: "Join global stats (anonymous)",
     privacy: "Only numbers, country, degree, and campus are sent. Name, song, phrase, and IP are never stored.",
-    go: "Show my thesis run", sending: "Crunching…", pick_month: "Pick a month", this_month: "This month", prev_year: "Previous year", next_year: "Next year", err_required: "Pick your team, degree, stage, and start month first.",
+    go: "Show my thesis run", sending: "Crunching…", pick_month: "Pick a month", this_month: "This month", prev_year: "Previous year", next_year: "Next year", err_required: "Still missing: {list}.", miss_country: "team", miss_degree: "degree", miss_status: "stage", miss_start: "start month", and: "and",
     video: "Download story video", video_busy: "Making video… {p}%", video_share: "Share video", video_no: "This browser can't make videos yet. Try the latest Chrome or Safari.",
     video_end: "Make your thesis run at", story_link: "Share story link", story_text: "Watch my thesis run on ThesiRun!", make_mine: "Make mine",
+    s8k_off: "You wrote", s8s_off: "for {team}, but it's not in the league yet.", off_dup: "You already have a run in the league. Delete it in the form to start from zero.",
+    off_private: "You chose not to share your data, so this run isn't counted.", off_fail: "Couldn't reach the server, so this run isn't counted.", off_deleted: "You deleted this run from the league.",
+    mine_title: "Your run is in the league", mine_body: "Team {team} · {pages} pages. One person, one run. Want to start from zero? Delete this run and your review, then log a new one.",
+    mine_del: "Delete run & review", mine_confirm: "Delete your run and review from the league? This can't be undone.", mine_done: "Deleted. You can log a new run and review again.",
+    rv_title: "What runners say", rv_sub: "Written by ThesiRun runners themselves. One run, one review.", rv_anon: "Anonymous runner",
+    rv_kicker: "One run, one review", rv_form_title: "How did it feel?", rv_ph: "Tell us about your ThesiRun experience (10–140 characters)",
+    rv_show_name: "Show my name as {mask}", rv_send: "Send review", rv_thanks: "Thanks! Your review is now on the home page.",
+    rv_bad: "Review rejected. Write 10–140 characters, no links or swearing.", rv_used: "This run has already been used for a review.", rv_slow: "Too many tries. Try again in an hour.", rv_fail: "Couldn't send. Check your connection and try again.",
     history_title: "Run history", history_sub: "Saved in this browser only.", history_clear: "Clear history", history_meta: "{date} · {pages} pages",
     card_title: "Your run card", share: "Share / Download", replay: "Replay story",
     duo_title: "Pacer duo card", pacer_kicker: "Find a pacer", pacer_title: "Challenge a friend", pacer_body: "Send a link to a friend. They fill it in, you both get a duel score and a match score.",
@@ -844,10 +860,12 @@ async function onSubmit(e) {
   e.preventDefault();
   const f = readForm();
   const err = $("form-error");
-  if (!f.country || !f.degree || f.status == null || !f.start) {
-    err.textContent = t("err_required");
+  const miss = ["country", "degree", "status", "start"].filter((k) => f[k] == null || f[k] === "");
+  if (miss.length) {
+    const names = miss.map((k) => t("miss_" + k));
+    err.textContent = t("err_required", { list: names.length > 1 ? `${names.slice(0, -1).join(", ")} ${t("and")} ${names.at(-1)}` : names[0] });
     err.classList.remove("hidden");
-    err.scrollIntoView({ block: "center" });
+    document.querySelector(`[data-i18n="f_${miss[0]}"]`).scrollIntoView({ block: "center" });
     return;
   }
   err.classList.add("hidden");
@@ -856,12 +874,18 @@ async function onSubmit(e) {
   const btn = e.submitter || $("form").querySelector("button:not([type])");
   busy(btn, true);
   btn.lastChild.textContent = t("sending");
-  if (f.share && !store.get("submitted")) {
+  run.off = !f.share ? "private" : store.get("run_token") ? "dup" : "fail";
+  if (run.off === "fail") {
     try {
       const res = await fetch("/api/run", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload(run)) });
       if (res.ok) {
         run.api = await res.json();
-        store.set("submitted", "1");
+        run.off = null;
+        if (run.api.review_token) {
+          store.set("run_token", run.api.review_token);
+          store.set("reviewed", "");
+          store.set("my_run", JSON.stringify({ country: run.country, pages: run.pages }));
+        }
       }
     } catch {}
   }
@@ -870,6 +894,80 @@ async function onSubmit(e) {
   busy(btn, false);
   btn.lastChild.textContent = t("go");
   openStory();
+}
+
+const maskName = (n) => n.trim().split(/\s+/).filter((w) => /^\p{L}/u.test(w)).slice(0, 3).map((w) => w[0].toUpperCase() + "***").join(" ") || null;
+
+function showReviewForm() {
+  const on = !!store.get("run_token") && !store.get("reviewed") && !run.sample && !run.shared;
+  $("review-box").classList.toggle("hidden", !on);
+  if (!on) return;
+  const m = run.name ? maskName(run.name) : null;
+  $("review-name-row").classList.toggle("hidden", !m);
+  $("review-name").checked = !!m;
+  $("review-name-label").textContent = m ? t("rv_show_name", { mask: m }) : "";
+}
+
+async function sendReview(e) {
+  e.preventDefault();
+  const btn = $("review-send"), msg = $("review-msg"), body = $("review-body").value.trim();
+  if (body.length < 10) return flash(msg, t("rv_bad"));
+  busy(btn, true);
+  let key = "rv_fail";
+  try {
+    const name = $("review-name").checked && run.name ? maskName(run.name) : null;
+    const res = await fetch("/api/review", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token: store.get("run_token"), name, body }) });
+    key = { 200: "rv_thanks", 409: "rv_used", 422: "rv_bad", 429: "rv_slow" }[res.status] || "rv_fail";
+    if (res.ok || res.status === 409) {
+      store.set("reviewed", "1");
+      $("review-form").classList.add("hidden");
+      await loadStats();
+      renderReviews();
+    }
+  } catch {}
+  busy(btn, false);
+  flash(msg, t(key));
+}
+
+function renderReviews() {
+  const list = stats?.reviews || [];
+  $("reviews").classList.toggle("hidden", !list.length);
+  $("review-list").replaceChildren(...list.map((r, i) => {
+    const li = stagger(h("li", "card lift grid content-between gap-4 p-5 shadow-drop"), i);
+    const who = h("span", "grid min-w-0");
+    who.append(h("b", "truncate", r.name || t("rv_anon")), h("span", "text-sm text-slate", `${t("deg_" + r.degree)} · ${countryName(r.country)} · ${t("p_" + r.persona)}`));
+    const foot = h("div", "flex items-center gap-3");
+    foot.append(h("span", "team h-8 shrink-0 px-3 " + (TEAM_CLS[r.country] || TEAM_CLS.OT), r.country), who);
+    li.append(h("p", "text-lg leading-snug font-semibold", `“${r.body}”`), foot);
+    return li;
+  }));
+}
+
+const offReason = (r) => (r.sample || r.shared || r.api ? null : r.off || "dup");
+
+function renderMine() {
+  const mine = store.get("run_token") ? store.json("my_run", null) : null;
+  $("mine").classList.toggle("hidden", !mine);
+  if (mine) $("mine-body").textContent = t("mine_body", { team: countryName(mine.country), pages: fmt(mine.pages) });
+}
+
+async function deleteMine(e) {
+  if (!confirm(t("mine_confirm"))) return;
+  const btn = e.currentTarget;
+  busy(btn, true);
+  let key = "rv_fail";
+  try {
+    const res = await fetch("/api/run/delete", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token: store.get("run_token") }) });
+    key = res.status === 429 ? "rv_slow" : res.ok || res.status === 404 ? "mine_done" : "rv_fail";
+    if (res.ok || res.status === 404) {
+      for (const k of ["run_token", "reviewed", "my_run", "submitted"]) store.set(k, "");
+      store.set("history", JSON.stringify(store.json("history", []).map((r) => (r.api ? { ...r, api: null, off: "deleted" } : r))));
+      await loadStats();
+      render();
+    }
+  } catch {}
+  busy(btn, false);
+  flash($("mine-msg"), t(key));
 }
 
 function saveHistory(r) {
@@ -1047,13 +1145,13 @@ function buildSlides(r) {
       li.append(h("span", "", `${i + 1} · ${CODE[x.k]}`), h("span", "tabular-nums", x.n ? fmt(x.v) : "–"));
       list.append(li);
     });
-    const any = lg.some((x) => x.n);
+    const any = lg.some((x) => x.n), off = offReason(r);
     return [
-      kicker(t("s8k")),
+      kicker(t(off ? "s8k_off" : "s8k")),
       giant("text-[clamp(3.5rem,20cqw,7rem)]", count(r.pages)),
-      h("p", "animate-rise relative font-display text-3xl font-extrabold", `${t("s8u")} ${t("s8s", { team: countryName(r.country) })}`),
+      h("p", "animate-rise relative font-display text-3xl font-extrabold", `${t("s8u")} ${t(off ? "s8s_off" : "s8s", { team: countryName(r.country) })}`),
       list,
-      h("p", "relative mt-3 text-sm font-bold", any ? t("s8_league") : t("s8_wait")),
+      h("p", "relative mt-3 text-sm font-bold", off ? t("off_" + off) : any ? t("s8_league") : t("s8_wait")),
     ];
   });
 
@@ -1078,7 +1176,7 @@ function buildSlides(r) {
   else
     add("bg-sky text-night", () => [
       routeDiamonds(r),
-      h("p", "animate-rise relative mt-10 font-display text-[clamp(3rem,15cqw,5.5rem)] leading-[0.9] font-extrabold tracking-tight text-white", t("s10", { next: Math.min(5, Math.floor(r.chapters) + 1) })),
+      h("p", "animate-rise relative mt-10 font-display text-[clamp(2.5rem,11cqw,5.5rem)] leading-[0.9] font-extrabold tracking-tight break-words text-white", t("s10", { next: Math.min(5, Math.floor(r.chapters) + 1) })),
       sub(t("s10s")),
       seeCard(),
     ]);
@@ -1444,6 +1542,8 @@ function videoSlides(r) {
   };
   const text = (x, txt, Y, color, size, w = 800, display = false) => {
     font(x, w, size, display);
+    const widest = Math.max(...String(txt).split(" ").map((s) => x.measureText(s).width));
+    if (widest > tw) font(x, w, (size = Math.floor((size * tw) / widest)), display);
     x.fillStyle = color;
     return wrapText(x, txt, M, Y, tw, size * 1.18);
   };
@@ -1550,11 +1650,12 @@ function videoSlides(r) {
     [TEAM[r.country], C.night, (x, p, up) => {
       const lg = teamLeague(), max = Math.max(1, ...lg.map((q) => q.v));
       x.translate(0, up(0));
-      text(x, t("s8k"), 420, C.night, 68);
+      const off = offReason(r);
+      text(x, t(off ? "s8k_off" : "s8k"), 420, C.night, 68);
       x.translate(0, up(1));
       big(x, num(r.pages, p), 720, C.night, 300);
       x.translate(0, up(2));
-      text(x, `${t("s8u")} ${t("s8s", { team: countryName(r.country) })}`, 850, C.night, 76, 800, true);
+      text(x, `${t("s8u")} ${t(off ? "s8s_off" : "s8s", { team: countryName(r.country) })}`, 850, C.night, 76, 800, true);
       x.translate(0, up(3));
       lg.forEach((q, i) => {
         const Y = 1040 + i * 112, mine = q.k === r.country, bw = Math.max(360, (tw + M) * (0.4 + (q.v / max) * 0.52) * Math.min(1, p * 1.8));
@@ -1572,7 +1673,7 @@ function videoSlides(r) {
         x.fillText(q.n ? fmt(q.v) : "–", bw - 40, Y + 60);
         x.textAlign = "left";
       });
-      text(x, lg.some((q) => q.n) ? t("s8_league") : t("s8_wait"), 1640, C.night, 40);
+      text(x, off ? t("off_" + off) : lg.some((q) => q.n) ? t("s8_league") : t("s8_wait"), 1640, C.night, 40);
     }],
     [C.night, C.butter, (x, p, up) => {
       x.translate(0, up(0));
@@ -1842,6 +1943,7 @@ function showResult() {
   $("pacer-box").classList.toggle("hidden", !!run.sample);
   $("duo-box").classList.toggle("hidden", !pacer || !!run.sample);
   if (!run.sample) store.set("me", pacerUrl(run));
+  showReviewForm();
   $("result").scrollIntoView();
   drawResult();
 }
@@ -2141,7 +2243,9 @@ function render() {
   if (pacer && $("pacer-banner")) $("pacer-banner").textContent = t("pacer_invite", { name: pacer.name });
   if ($("league")) {
     renderLanding();
+    renderReviews();
     renderHistory();
+    renderMine();
   }
   if ($("p-negara")) renderArena();
 }
@@ -2169,6 +2273,8 @@ if ($("form")) {
   $("replay").addEventListener("click", openStory);
   $("share-video").addEventListener("click", (e) => shareVideo(e.currentTarget));
   $("share-story").addEventListener("click", () => shareLink(storyUrl(run), t("story_text"), $("story-msg")));
+  $("review-form").addEventListener("submit", sendReview);
+  $("mine-del").addEventListener("click", deleteMine);
   $("history-clear").addEventListener("click", () => {
     store.set("history", "[]");
     renderHistory();
