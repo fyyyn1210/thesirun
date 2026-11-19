@@ -14,7 +14,7 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
-DB_PATH = os.environ.get("DB_PATH", "thesirun.db")
+DB_PATH = os.environ.get("DB_PATH") or os.path.join(os.environ.get("DATA_DIR", "."), "thesirun.db")
 ALLOWED_ORIGIN = os.environ.get("ALLOWED_ORIGIN", "https://thesirun.embarko.app")
 MIN_GROUP = 30
 MIN_CAMPUS = 10
@@ -466,5 +466,8 @@ if __name__ == "__main__":
     elif "--daily-report" in sys.argv:
         with closing(connect()) as db:
             print(json.dumps(daily_report(db)))
+    elif len(sys.argv) > 1:
+        print("usage: python main.py [--selftest | --daily-report | --reviews | --hide-review ID]")
     else:
-        print("usage: python main.py --selftest | --daily-report | --reviews | --hide-review ID")
+        import uvicorn
+        uvicorn.run(app, host="0.0.0.0", port=int(os.environ.get("PORT", "8000")))
