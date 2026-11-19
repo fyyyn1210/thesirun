@@ -59,7 +59,7 @@ const I18N = {
     video: "Download video story", video_busy: "Membuat video… {p}%", video_share: "Bagikan video", video_no: "Browser ini belum bisa membuat video. Coba Chrome atau Safari terbaru.",
     video_end: "Bikin lari skripsimu di", story_link: "Bagikan link story", story_text: "Lihat lari skripsiku di ThesiRun!", make_mine: "Bikin punyaku",
     s8k_off: "Kamu menulis", s8s_off: "untuk {team}, tapi belum masuk liga.", off_dup: "Kamu sudah punya lari di liga. Hapus dulu di form untuk mulai dari 0.",
-    off_private: "Kamu memilih tidak membagikan data, jadi lari ini tidak dihitung.", off_fail: "Gagal terkirim ke server, jadi lari ini tidak dihitung.", off_deleted: "Lari ini sudah kamu hapus dari liga.",
+    off_private: "Kamu memilih tidak membagikan data, jadi lari ini tidak dihitung.", off_fail: "Gagal terkirim ke server, jadi lari ini tidak dihitung.", off_slow: "Terlalu banyak kiriman dari jaringanmu. Coba lagi sejam lagi.", off_deleted: "Lari ini sudah kamu hapus dari liga.",
     mine_title: "Lari kamu sudah masuk liga", mine_body: "Tim {team} · {pages} halaman. Satu orang satu lari. Mau mulai dari 0? Hapus lari ini beserta review-mu, lalu isi lagi.",
     mine_del: "Hapus lari & review", mine_confirm: "Hapus lari dan review-mu dari liga? Ini tidak bisa dibatalkan.", mine_done: "Terhapus. Kamu bisa isi lari baru dan review lagi.",
     rv_title: "Apa kata mereka", rv_sub: "Ditulis runner ThesiRun sendiri. Satu lari, satu review.", rv_anon: "Runner anonim",
@@ -132,7 +132,7 @@ const I18N = {
     video: "Download story video", video_busy: "Making video… {p}%", video_share: "Share video", video_no: "This browser can't make videos yet. Try the latest Chrome or Safari.",
     video_end: "Make your thesis run at", story_link: "Share story link", story_text: "Watch my thesis run on ThesiRun!", make_mine: "Make mine",
     s8k_off: "You wrote", s8s_off: "for {team}, but it's not in the league yet.", off_dup: "You already have a run in the league. Delete it in the form to start from zero.",
-    off_private: "You chose not to share your data, so this run isn't counted.", off_fail: "Couldn't reach the server, so this run isn't counted.", off_deleted: "You deleted this run from the league.",
+    off_private: "You chose not to share your data, so this run isn't counted.", off_fail: "Couldn't reach the server, so this run isn't counted.", off_slow: "Too many submissions from your network. Try again in an hour.", off_deleted: "You deleted this run from the league.",
     mine_title: "Your run is in the league", mine_body: "Team {team} · {pages} pages. One person, one run. Want to start from zero? Delete this run and your review, then log a new one.",
     mine_del: "Delete run & review", mine_confirm: "Delete your run and review from the league? This can't be undone.", mine_done: "Deleted. You can log a new run and review again.",
     rv_title: "What runners say", rv_sub: "Written by ThesiRun runners themselves. One run, one review.", rv_anon: "Anonymous runner",
@@ -886,6 +886,8 @@ async function onSubmit(e) {
           store.set("reviewed", "");
           store.set("my_run", JSON.stringify({ country: run.country, pages: run.pages }));
         }
+      } else if (res.status === 429) {
+        run.off = "slow";
       }
     } catch {}
   }

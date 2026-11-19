@@ -20,6 +20,7 @@ MIN_GROUP = 30
 MIN_CAMPUS = 10
 MAX_BODY = 2048
 RATE_LIMIT = 5
+TRUSTED_PROXIES = int(os.environ.get("TRUSTED_PROXIES", "1"))
 COUNTRIES = ("ID", "IN", "CN", "US", "JP", "OT")
 TEAMS = tuple(c for c in COUNTRIES if c != "OT")
 Country = Literal["ID", "IN", "CN", "US", "JP", "OT"]
@@ -200,8 +201,10 @@ async def security_headers(request: Request, call_next):
 
 
 def client_ip(request: Request):
-    xff = request.headers.get("x-forwarded-for")
-    return xff.split(",")[-1].strip() if xff else (request.client.host if request.client else "?")
+    hops = [x.strip() for x in (request.headers.get("x-forwarded-for") or "").split(",") if x.strip()]
+    if len(hops) > TRUSTED_PROXIES:
+        return hops[-1 - TRUSTED_PROXIES]
+    return request.client.host if request.client else "?"
 
 
 def rate_limited(ip):
